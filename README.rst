@@ -6,10 +6,10 @@ A `Rasterio <https://github.com/mapbox/rasterio>`__ plugin for extracting
 an image's dataset-level mask.
 
 .. image:: https://travis-ci.org/geowurster/rio-ds-mask.svg?branch=master
-    :target: https://travis-ci.org/geowurster/rio-ds-mask?branch=master
+    :target: https://travis-ci.org/geowurster/rio-ds-mask
 
-.. image:: https://coveralls.io/repos/geowurster/rio-ds-mask/badge.svg?branch=master
-    :target: https://coveralls.io/r/geowurster/rio-ds-mask?branch=master
+.. image:: https://coveralls.io/repos/github/geowurster/rio-ds-mask/badge.svg?branch=master
+    :target: https://coveralls.io/github/geowurster/rio-ds-mask
 
 
 =====
