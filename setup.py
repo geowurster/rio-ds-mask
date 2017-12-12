@@ -56,7 +56,7 @@ setup(
     author=author,
     author_email=email,
     classifiers=[
-        "Development Status:: 5 - Production / Stable",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Intended Audience :: Information Technology",
         "Intended Audience :: Science/Research",
