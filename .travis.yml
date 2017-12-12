@@ -10,6 +10,10 @@ python:
 
 install:
   - pip install pip setuptools wheel --upgrade
+  # More recent Rasterio releases include Linux wheels containing a
+  # minimal version of GDAL, which means GDAL does not need to be
+  # installed directly.
+  - pip install "rasterio>=1.0a12"
   - pip install .\[test\]
 
 script:
