@@ -1,7 +1,7 @@
 """Extract an image's dataset-level mask and write to a new file."""
 
 
-__version__ = '0.1'
+__version__ = '1.0'
 __author__ = 'Kevin Wurster'
 __email__ = 'wursterk@gmail.com'
 __source__ = 'https://github.com/geowurster/rio-ds-mask'
