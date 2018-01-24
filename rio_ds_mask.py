@@ -38,10 +38,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
 
+import itertools as it
+import operator as op
+import sys
+
 import click
 import cligj
 import rasterio as rio
 from rasterio.rio import options
+
+
+if sys.version_info[0] == 2:
+    from itertools import imap as map
 
 
 @click.command(name='ds-mask')
@@ -58,17 +66,23 @@ def rio_ds_mask(input, output, driver, creation_options):
 
     with rio.open(input) as src:
 
+        all_windows = map(op.itemgetter(1), src.block_windows())
+        window_data = ((w, src.dataset_mask(window=w)) for w in all_windows)
+
+        first = next(window_data)
+        window_data = it.chain([first], window_data)
+        dtype = first[1].dtype
+        del first
+
         meta = src.meta.copy()
         meta.update(
             count=1,
-            driver=driver or src.driver)
+            driver=driver or src.driver,
+            dtype=dtype)
 
         if creation_options:
             meta.update(**creation_options)
 
         with rio.open(output, 'w', **meta) as dst:
-            for _, window in src.block_windows():
-                dst.write(
-                    src.dataset_mask(window=window),
-                    indexes=1,
-                    window=window)
+            for window, data in window_data:
+                dst.write(data, indexes=1, window=window)

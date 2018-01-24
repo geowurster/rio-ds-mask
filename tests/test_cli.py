@@ -9,27 +9,29 @@ from rasterio.rio.main import main_group as rio_main
 from rio_ds_mask import rio_ds_mask
 
 
-def test_compare_rasterio_dataset_mask(path_alpha_tif, runner, tmpdir):
+def test_compare_rasterio_dataset_mask(
+        path_alpha_tif, path_alpha_16bit_tif, runner, tmpdir):
 
     """Compare against Rasterio's ``src.dataset_mask()``."""
 
     outfile = str(tmpdir.join('compare_rasterio_dataset_mask.tif'))
 
-    with rio.open(path_alpha_tif) as src:
-        expected = src.dataset_mask()
+    for path in (path_alpha_tif, path_alpha_16bit_tif):
+        with rio.open(path) as src:
+            expected = src.dataset_mask()
 
-    result = runner.invoke(rio_ds_mask, [
-        path_alpha_tif, outfile,
-        '--co', 'COMPRESS=DEFLATE'])
+        result = runner.invoke(rio_ds_mask, [
+            path, outfile,
+            '--co', 'COMPRESS=DEFLATE'])
 
-    assert result.exit_code == 0
+        assert result.exit_code == 0
 
-    with rio.open(outfile) as src:
-        assert src.compression == Compression.deflate
-        assert not src.is_tiled
-        actual = src.read(1)
+        with rio.open(outfile) as src:
+            assert src.compression == Compression.deflate
+            assert not src.is_tiled
+            actual = src.read(1)
 
-    assert np.array_equal(expected, actual)
+        assert np.array_equal(expected, actual)
 
 
 def test_plugin_registered(runner):
