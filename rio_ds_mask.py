@@ -56,12 +56,14 @@ if sys.version_info[0] == 2:
 @options.file_in_arg
 @options.file_out_arg
 @cligj.format_opt
+@options.dtype_opt
 @options.creation_options
-def rio_ds_mask(input, output, driver, creation_options):
+def rio_ds_mask(input, output, driver, dtype, creation_options):
 
     """Extract an image's dataset-level mask.
 
-    If '--driver' is not given the input driver is used.
+    Both output driver and datatype are derived from the input image if
+    not given.
     """
 
     with rio.open(input) as src:
@@ -71,14 +73,14 @@ def rio_ds_mask(input, output, driver, creation_options):
 
         first = next(window_data)
         window_data = it.chain([first], window_data)
-        dtype = first[1].dtype
+        detected_dtype = first[1].dtype
         del first
 
         meta = src.meta.copy()
         meta.update(
             count=1,
             driver=driver or src.driver,
-            dtype=dtype)
+            dtype=dtype or detected_dtype)
 
         if creation_options:
             meta.update(**creation_options)

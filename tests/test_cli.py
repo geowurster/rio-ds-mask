@@ -34,6 +34,24 @@ def test_compare_rasterio_dataset_mask(
         assert np.array_equal(expected, actual)
 
 
+def test_dtype(runner, tmpdir, path_alpha_16bit_tif):
+
+    """Set output datatype and driver."""
+
+    outfile = str(tmpdir.join('test_dtype_driver.jpg'))
+
+    result = runner.invoke(rio_ds_mask, [
+        path_alpha_16bit_tif, outfile,
+        '--dtype', 'uint8',
+        '--driver', 'JPEG'])
+
+    assert result.exit_code == 0, result.output
+
+    with rio.open(outfile) as src:
+        assert src.dtypes[0] == rio.uint8
+        assert src.driver == 'JPEG'
+
+
 def test_plugin_registered(runner):
 
     """Make sure plugin is registered."""
