@@ -100,6 +100,12 @@ ENV/
 # mypy
 .mypy_cache/
 
+# pytest
+.pytest_cache/
+
+# GDAL PAM files can get weird
+tests/data/*.aux.xml
+
 # PyCharm
 .idea/
 
