@@ -1,14 +1,14 @@
 """Extract an image's dataset-level mask and write to a new file."""
 
 
-__version__ = '1.1'
+__version__ = '1.2'
 __author__ = 'Kevin Wurster'
 __email__ = 'wursterk@gmail.com'
 __source__ = 'https://github.com/geowurster/rio-ds-mask'
 __license__ = '''
 New BSD License
 
-Copyright (c) 2017, Kevin D. Wurster
+Copyright (c) 2017-2018, Kevin D. Wurster
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
