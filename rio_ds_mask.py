@@ -44,12 +44,44 @@ import sys
 
 import click
 import cligj
+import numpy as np
 import rasterio as rio
 from rasterio.rio import options
 
 
 if sys.version_info[0] == 2:
     from itertools import imap as map
+
+
+def _norm_gdal_mask(array, src_dtypes):
+
+    """When writing masks GDAL uses 0's for opaque and 255's for transparent,
+    but when reading masks the returned value differs based on the image's
+    datatype.  8 bit images produce masks where 0's are opaque and 255's
+    are transparent, however 16 bit images use 0's for opaque and 1's for
+    transparent.  If the image's datatype is 'int16' or 'uint16' and the
+    mask's maximum value is 1, then all 1's are translated to 255's.  The
+    mask's datatype is preserved.  I have not fully investigated all of
+    GDAL's masking options to determine if the behavior is consistent.  If
+    it is found to be a deliberate choice then the normalization will be
+    removed.
+
+    Parameters
+    ----------
+    array : numpy.ndarray
+        Array to normalize.
+    src_dtypes : sequence
+        Parent image's datatypes.
+
+    Returns
+    -------
+    numpy.ndarray
+    """
+
+    cast = getattr(np, array.dtype.name)
+    if set(src_dtypes) & {'uint16', 'int16'} and array.max() == 1:
+        array = np.where(array > 0, cast(255), cast(0))
+    return array
 
 
 @click.command(name='ds-mask')
@@ -64,6 +96,18 @@ def rio_ds_mask(input, output, driver, dtype, creation_options):
 
     Both output driver and datatype are derived from the input image if
     not given.
+
+    In some cases this plugin alters GDAL's returned mask values.  When
+    writing masks GDAL uses 0's for opaque and 255's for transparent, but
+    when reading masks the returned value differs based on the image's
+    datatype.  8 bit images produce 8 bit masks where 0's are opaque and
+    255's are transparent, however 16 bit images use 0's for opaque and 1's
+    for transparent, still stored as 8 bit.  If the image's datatype is
+    'int16' or 'uint16' and the mask's maximum value is 1, then all 1's are
+    translated to 255's.  The mask's datatype is preserved.  I have not fully
+    investigated all of GDAL's masking options to determine if the behavior
+    is consistent.  If it is found to be a deliberate choice then the
+    normalization will be removed.
     """
 
     with rio.open(input) as src:
@@ -73,7 +117,7 @@ def rio_ds_mask(input, output, driver, dtype, creation_options):
 
         first = next(window_data)
         window_data = it.chain([first], window_data)
-        detected_dtype = first[1].dtype
+        detected_dtype = first[1].dtype.name
         del first
 
         meta = src.meta.copy()
@@ -86,5 +130,6 @@ def rio_ds_mask(input, output, driver, dtype, creation_options):
             meta.update(**creation_options)
 
         with rio.open(output, 'w', **meta) as dst:
-            for window, data in window_data:
-                dst.write(data, indexes=1, window=window)
+            for window, mask in window_data:
+                dst.write(
+                    _norm_gdal_mask(mask, src.dtypes), indexes=1, window=window)
