@@ -18,19 +18,33 @@ Usage
 
 .. code-block:: console
 
-    $ rio ds-mask --help
     Usage: rio ds-mask [OPTIONS] INPUT OUTPUT
 
       Extract an image's dataset-level mask.
 
-      If '--driver' is not given the input driver is used.
+      Both output driver and datatype are derived from the input image if not
+      given.
+
+      In some cases this plugin alters GDAL's returned mask values.  When
+      writing masks GDAL uses 0's for opaque and 255's for transparent, but when
+      reading masks the returned value differs based on the image's datatype.  8
+      bit images produce 8 bit masks where 0's are opaque and 255's are
+      transparent, however 16 bit images use 0's for opaque and 1's for
+      transparent, still stored as 8 bit.  If the image's datatype is 'int16' or
+      'uint16' and the mask's maximum value is 1, then all 1's are translated to
+      255's.  The mask's datatype is preserved.  I have not fully investigated
+      all of GDAL's masking options to determine if the behavior is consistent.
+      If it is found to be a deliberate choice then the normalization will be
+      removed.
 
     Options:
-      -f, --format, --driver TEXT  Output format driver
-      --co, --profile NAME=VALUE   Driver specific creation options.See the
-                                   documentation for the selected output driver
-                                   for more information.
-      --help                       Show this message and exit.
+      -f, --format, --driver TEXT     Output format driver
+      -t, --dtype [ubyte|uint8|uint16|int16|uint32|int32|float32|float64]
+                                      Output data type.
+      --co, --profile NAME=VALUE      Driver specific creation options.See the
+                                      documentation for the selected output driver
+                                      for more information.
+      --help                          Show this message and exit.
 
 This example command creates a singleband ``uint8`` image that is acceptable
 to use as a GDAL mask band, meaning that pixels with a value of ``255`` are
